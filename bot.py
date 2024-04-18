@@ -17,13 +17,13 @@ async def send_message():
     while True:
         try:
             # Send a message to the specified user
-            await client.send_message('testing6977', 'Hello')
+            await client.send_message('testing6977', 'Hello its me')
             print("Message sent to testing6977")
         except Exception as e:
             print(f"Error sending message: {e}")
 
         # Wait for 10 seconds before sending the next message
-        await asyncio.sleep(10)
+        await asyncio.sleep(300)
 
 async def main():
     # Start the send_message coroutine
