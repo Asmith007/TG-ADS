@@ -1,0 +1,6 @@
+type: web  # Specify the service type (web or worker)
+name: telegram-bot  # Specify the name of your service
+env: python3  # Specify the environment
+plan: standard  # Specify the plan
+buildCommand: pip install -r requirements.txt  # Command to install dependencies
+startCommand: python bot.py  # Command to start the script
