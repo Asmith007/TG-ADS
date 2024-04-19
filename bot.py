@@ -1,6 +1,7 @@
 import os
 from telethon import TelegramClient
 import asyncio
+from aiohttp import web
 
 # Retrieve api_id and api_hash from environment variables (or set them manually here)
 api_id = int(os.getenv('API_ID'))  # Convert API ID to integer
@@ -15,9 +16,16 @@ client = TelegramClient(session_file, api_id, api_hash)
 # Define the recipient you want to send messages to (Telegram username or user ID)
 recipient = 'testing6977'  # Replace with the recipient's Telegram username or user ID
 
+# Define the port number for the HTTP server
+PORT = int(os.getenv('PORT', 10000))
+
 # Function to log when the bot goes live
 def log_bot_live():
     print("Bot is live")
+
+# Define the HTTP server response
+async def handle(request):
+    return web.Response(text="HTTP server is running.")
 
 async def send_message():
     try:
@@ -28,7 +36,7 @@ async def send_message():
         print(f"Error sending message: {e}")
 
 async def main():
-    # Call the function to log when the bot goes live
+    # Log when the bot goes live
     log_bot_live()
 
     while True:
@@ -41,5 +49,17 @@ async def start():
     async with client:
         await main()
 
-# Run the start function in the asyncio event loop
-asyncio.run(start())
+# Create the aiohttp application
+app = web.Application()
+app.router.add_get("/", handle)
+
+# Run the HTTP server and the bot script concurrently
+async def run():
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", PORT)
+    await site.start()
+    await start()
+
+# Start the asyncio event loop to run both tasks concurrently
+asyncio.run(run())
