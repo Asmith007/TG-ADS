@@ -1,7 +1,7 @@
 import os
-from telethon import TelegramClient
 import asyncio
-from aiohttp import web
+from telethon import TelegramClient
+from flask import Flask
 
 # Retrieve api_id and api_hash from environment variables (or set them manually here)
 api_id = int(os.getenv('API_ID'))  # Convert API ID to integer
@@ -16,17 +16,18 @@ client = TelegramClient(session_file, api_id, api_hash)
 # Define the recipient you want to send messages to (Telegram username or user ID)
 recipient = 'testing6977'  # Replace with the recipient's Telegram username or user ID
 
-# Define the port number for the HTTP server
-PORT = int(os.getenv('PORT', 10000))
+# Define the Flask app and the route
+app = Flask(__name__)
+
+@app.route('/')
+def hello_world():
+    return 'Hello World!'
 
 # Function to log when the bot goes live
 def log_bot_live():
     print("Bot is live")
 
-# Define the HTTP server response
-async def handle(request):
-    return web.Response(text="HTTP server is running.")
-
+# Function to send a message
 async def send_message():
     try:
         # Send a message to the specified user
@@ -35,7 +36,8 @@ async def send_message():
     except Exception as e:
         print(f"Error sending message: {e}")
 
-async def main():
+# Function to run the Telegram bot
+async def run_bot():
     # Log when the bot goes live
     log_bot_live()
 
@@ -44,22 +46,15 @@ async def main():
         await send_message()
         await asyncio.sleep(120)
 
-async def start():
-    # Initialize the Telegram client and run the main function
-    async with client:
-        await main()
+# Function to run the Flask server
+async def run_flask():
+    port = 3000
+    app.run(host='0.0.0.0', port=port)
 
-# Create the aiohttp application
-app = web.Application()
-app.router.add_get("/", handle)
+# Function to concurrently run the bot and Flask server
+async def main():
+    # Run both the bot and Flask server concurrently
+    await asyncio.gather(run_bot(), run_flask())
 
-# Run the HTTP server and the bot script concurrently
-async def run():
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", PORT)
-    await site.start()
-    await start()
-
-# Start the asyncio event loop to run both tasks concurrently
-asyncio.run(run())
+# Start the asyncio event loop and run the main function
+asyncio.run(main())
